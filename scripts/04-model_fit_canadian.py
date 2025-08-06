@@ -1,27 +1,28 @@
-# Author: Adapted for Canadian University Basketball Data (Fixed)
+# Author: Adapted for Canadian University Basketball Data
 # Date: 2024-12-19
 
 """
 This script takes processed data from the 'data' folder in the project repository
-and creates models to predict the 'Mins' feature using other features.
-Types of model produced includes: baseline, linear regression, and random forest.
+and creates various models to predict the 'Mins' feature using other features.
+Types of model produced includes: baseline, linear regression, random forest and LGBM.
 Afterwards, the scripts test the models and calculates the MSE and coefficient of
-determination using cross-validation. Feature importance plots are created for the 
-Random Forest model. These figures are then saved accordingly.
+determination using cross-validation. Residual plots are created for all models and a feature
+importance plot is created for the GBM model. These figures are then saved accordingly.
 
 Both the file name and the save folder are required as inputs.
 
-Usage: 04-model_fit_canadian_fixed.py --file_name=<file_name> --save_folder=<save_folder>
+Usage: 04-model_fit_canadian.py --file_name=<file_name> --save_folder=<save_folder>
 
 Options:
 --file_name=<file_name>         File name of the processed features and targets
 --save_folder=<save_folder>	Folder to save all figures and csv files produced
 
-Example: python scripts/04-model_fit_canadian_fixed.py --file_name=player_data_ready_canadian.csv --save_folder=results
+Example: python scripts/04-model_fit_canadian.py --file_name=player_data_ready_canadian.csv --save_folder=results
 """
 
 # Loading the required packages
 # Models
+import lightgbm as lgb
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import LinearRegression
 # Plotting
@@ -50,7 +51,7 @@ def main(file_name, save_folder):
 	# Load the processed data from csv
 	# e.g. 'player_data_ready_canadian.csv'
 
-	print(colored("\nWARNING: This script takes about 1 minute to run\n", 'yellow'))
+	print(colored("\nWARNING: This script takes about 2 minutes to run\n", 'yellow'))
 
 	# Validate the file-path to load file
 	path_str = str('../data/' + file_name)
@@ -80,14 +81,17 @@ def main(file_name, save_folder):
 	cv = KFold(n_splits=5, shuffle=True, random_state=42)
 
 	# Fit the models
+	lgb_model = lgbm_model(X, y, cv)
 	rf_model = random_forest_model(X, y, cv)
 	lm_model = linear_model(X, y, cv)
 	base_model = baseline_model()
 
 	# Get the predictions and score each model
 	results = {}
+	resid_df_comb = pd.DataFrame()
 
 	models = [
+		(lgb_model, 'LightGBM'), 
 		(rf_model, 'Random Forest'), 
 		(lm_model, 'Linear Regression'), 
 		(base_model, 'Base Model (5 Game Ave)')
@@ -126,8 +130,8 @@ def main(file_name, save_folder):
 	# Save results
 	save_results(results, save_folder)
 
-	# Create feature importance plot for Random Forest
-	feature_importance(rf_model, X, save_folder)
+	# Create feature importance plot for LightGBM
+	feature_importance(lgb_model, X, save_folder)
 
 	print(colored('\nModeling complete!', 'green'))
 
@@ -165,6 +169,33 @@ def preprocess(data):
 	X = X.fillna(X.mean())
 
 	return X, y
+
+def lgbm_model(X, y, cv):
+	"""
+	Fit LightGBM model with cross-validation.
+
+	Parameters:
+	-----------
+	X -- (pd DataFrame) the feature matrix
+	y -- (pd Series) the target variable
+	cv -- (KFold) cross-validation object
+
+	Return:
+	-----------
+	model -- (LightGBM model) fitted model
+	"""
+	model = lgb.LGBMRegressor(
+		n_estimators=100,
+		learning_rate=0.1,
+		max_depth=6,
+		random_state=42,
+		verbose=-1
+	)
+	
+	# Fit the model
+	model.fit(X, y)
+	
+	return model
 
 def random_forest_model(X, y, cv):
 	"""
@@ -224,7 +255,7 @@ def save_results(results, save_folder):
 	"""
 	results_df = pd.DataFrame(results).T
 	results_df = results_df.round(4)
-	results_df.to_csv(f'{save_folder}/modelling-score_table_canadian_fixed.csv')
+	results_df.to_csv(f'{save_folder}/modelling-score_table_canadian.csv')
 	
 	print(colored('Results saved!', 'green'))
 	print('\nModel Performance Summary:')
@@ -232,11 +263,11 @@ def save_results(results, save_folder):
 
 def feature_importance(model, X, save_folder):
 	"""
-	Create feature importance plot for Random Forest model.
+	Create feature importance plot for LightGBM model.
 
 	Parameters:
 	-----------
-	model -- (RandomForestRegressor) fitted model
+	model -- (LightGBM model) fitted model
 	X -- (pd DataFrame) the feature matrix
 	save_folder -- (str) folder to save results
 	"""
@@ -256,10 +287,10 @@ def feature_importance(model, X, save_folder):
 	plt.barh(range(len(top_features)), top_features['Importance'])
 	plt.yticks(range(len(top_features)), top_features['Feature'])
 	plt.xlabel('Feature Importance')
-	plt.title('Random Forest Feature Importance (Canadian University Basketball)')
+	plt.title('LightGBM Feature Importance (Canadian University Basketball)')
 	plt.gca().invert_yaxis()
 	plt.tight_layout()
-	plt.savefig(f'{save_folder}/modelling-rf_importance_canadian_fixed.png', dpi=300, bbox_inches='tight')
+	plt.savefig(f'{save_folder}/modelling-gbm_importance_canadian.png', dpi=300, bbox_inches='tight')
 	plt.close()
 	
 	print(colored('Feature importance plot saved!', 'green'))
