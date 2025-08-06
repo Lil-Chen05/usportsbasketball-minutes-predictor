@@ -80,18 +80,41 @@ python scripts/06-baseline_comparison_canadian.py --file_name=player_data_ready_
 
 ## 📈 Model Performance
 
-### Cross-Validation Results (5-fold)
-| Model | R² Score | RMSE | MAE | Test Predictions |
-|-------|----------|------|-----|------------------|
-| **Linear Regression** | **0.640** | **6.14** | **4.87** | 7,425 |
-| Random Forest | 0.644 | 6.15 | 4.89 | 7,425 |
-| LightGBM | 0.642 | 6.17 | 4.91 | 7,425 |
-| 5-Game Rolling Average | 0.337 | 8.33 | 6.35 | 7,425 |
+### Cross-Validation Results (5-Fold)
+
+| Model                  | R² Score | RMSE | MAE  | Test Predictions |
+|------------------------|----------|------|------|------------------|
+| **Linear Regression**  | **0.640** | **6.14** | **4.87** | 7,425 |
+| Random Forest          | 0.644     | 6.15 | 4.89 | 7,425 |
+| LightGBM               | 0.642     | 6.17 | 4.91 | 7,425 |
+| 5-Game Rolling Average | 0.337     | 8.33 | 6.35 | 7,425 |
+
+---
 
 ### Baseline Comparison
-- **Linear Regression vs 5-Game Rolling Average**: 89.8% improvement
-- **Linear Regression vs 3-Game Rolling Average**: 140.6% improvement
-- **Feature engineering provides tremendous value** in sports prediction
+
+- **Linear Regression vs. 5-Game Rolling Average**: 89.8% improvement  
+- **Linear Regression vs. 3-Game Rolling Average**: 140.6% improvement  
+- **Feature engineering adds substantial predictive power** in the context of sports analytics.
+
+![Baseline Comparison](results/baseline_comparison_canadian.png)
+
+- Linear Regression consistently outperforms rolling averages across all evaluation metrics — including mean squared error, root mean squared error, mean absolute error, and R² score.
+
+![Prediction Comparison](results/prediction_comparison_plots_canadian.png)
+
+- The scatterplot demonstrates that Linear Regression predictions are much more concentrated and closely aligned with the actual minutes played, compared to rolling average methods.
+
+---
+
+### Model Comparison
+
+![Model Comparison](results/prediction_scatter_plots_canadian.png)
+
+- This figure illustrates the lack of meaningful improvements achieved using more advanced models such as Random Forest and LightGBM over basic Linear Regression.
+
+
+
 
 ## 🎯 Key Insights
 
@@ -117,7 +140,7 @@ termcolor>=1.1.0
 
 ## 🤝 Acknowledgments
 
-This project is inspired by and builds upon the **NBA Minutes Predictor** repository, which provided the foundational methodology and pipeline structure for sports analytics. The original repository demonstrated the value of feature engineering and machine learning in sports prediction, which we have successfully adapted for Canadian University basketball data.
+This project is inspired by and builds upon the **NBA Minutes Predictor** repository, which provided the foundational methodology and pipeline structure for sports analytics. The original repository demonstrated the value of feature engineering and machine learning in sports prediction, which I have successfully adapted for Canadian University basketball data.
 
 **Original Repository**: NBA Minutes Predictor - A machine learning approach to predicting NBA player minutes using historical performance data.
 
