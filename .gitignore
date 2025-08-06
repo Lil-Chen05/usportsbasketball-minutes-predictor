@@ -130,3 +130,4 @@ dmypy.json
 
 # Data files like csv's
 #/data/*.csv
+/BASELINE_ANALYSIS.md

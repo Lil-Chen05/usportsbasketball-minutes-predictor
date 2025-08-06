@@ -152,4 +152,3 @@ def predict_minutes_ensemble(ml_pred, rolling_pred, weight=0.8):
 3. **Dataset size matters** for reliable model performance
 4. **Linear Regression captures complex patterns** beyond simple averages
 
-**Recommendation:** Use Linear Regression as your primary prediction method for Canadian University basketball minutes prediction. The 89.8% improvement over rolling averages clearly shows the value of sophisticated modeling approaches with proper feature engineering. 
